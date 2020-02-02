@@ -2,75 +2,83 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-class Square extends React.Component {
+class VideoWindow extends React.Component {
+
+    componentDidMount() {
+        const player = document.getElementById('player');
+        const constraints = {
+            video: true,
+        };
+          
+          // Attach the video stream to the video element and autoplay.
+        navigator.mediaDevices.getUserMedia(constraints)
+        .then((stream) => {
+            player.srcObject = stream;
+        });
+    }
+
+    render() {
+        return (<video id="player" controls autoplay></video>
+        );
+    }
+}
+
+class CaptureButton extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            value: null
+            player: null,
+            canvas: null
         }
     }
 
+    componentDidMount() {
+        const elementPlayer = document.getElementById('player');
+        const elementCanvas = document.getElementById('canvas');
+        this.setState({
+            player: elementPlayer,
+            canvas: elementCanvas
+        });
+    }
+
+    captureImage() {
+        const player = this.state.player;
+        const canvas = this.state.canvas;
+        const context = canvas.getContext('2d');
+        context.drawImage(player, 0, 0, canvas.width, canvas.height);
+    }
+    
     render() {
-      return (
-        <button className="square" onClick = {() => this.setState({value: 'X'}) }>
-          {this.state.value}
-        </button>
-      );
+        return (
+            <button id="capture" onClick = {() => this.captureImage()} >Capture</button>
+        );
     }
-  }
-  
-  class Board extends React.Component {
-    renderSquare(i) {
-      return <Square value ={i} />;
-    }
-  
+}
+
+class Canvas extends React.Component {
     render() {
-      const status = 'Next player: X';
-  
-      return (
-        <div>
-          <div className="status">{status}</div>
-          <div className="board-row">
-            {this.renderSquare(0)}
-            {this.renderSquare(1)}
-            {this.renderSquare(2)}
-          </div>
-          <div className="board-row">
-            {this.renderSquare(3)}
-            {this.renderSquare(4)}
-            {this.renderSquare(5)}
-          </div>
-          <div className="board-row">
-            {this.renderSquare(6)}
-            {this.renderSquare(7)}
-            {this.renderSquare(8)}
-          </div>
-        </div>
-      );
+        return (
+            <canvas id="canvas" width={320} height={240}></canvas>
+        )
     }
-  }
-  
-  class Game extends React.Component {
+}
+
+class AutoJudgeTool extends React.Component {
     render() {
-      return (
-        <div className="game">
-          <div className="game-board">
-            <Board />
-          </div>
-          <div className="game-info">
-            <div>{/* status */}</div>
-            <ol>{/* TODO */}</ol>
-          </div>
-        </div>
-      );
+        return (
+            <div >
+                <VideoWindow/>   
+                <CaptureButton/>
+                <Canvas/>                
+            </div>
+        );
     }
-  }
-  
-  // ========================================
-  
-  ReactDOM.render(
-    <Game />,
+}
+
+// ========================================
+
+ReactDOM.render(
+    <AutoJudgeTool />,
     document.getElementById('root')
-  );
-  
+);
